@@ -1,10 +1,14 @@
 package org.example.demo.service;
 
+import com.fasterxml.jackson.databind.util.BeanUtil;
 import org.example.demo.common.Account;
+import org.example.demo.common.req.SignReq;
 import org.example.demo.dao.AccountMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 import java.util.Random;
 
 @Service
@@ -13,13 +17,10 @@ public class AccountService {
     @Resource
     private AccountMapper accountMapper;
 
-    public Account sign(String username, String password, String email) {
+    public Account sign(SignReq req) {
         Account account = new Account();
         account.setUid(getUid());
-        account.setNickname(username);
-        // 加密
-        account.setPassword(password);
-        account.setEmail(email);
+        BeanUtils.copyProperties(req, account);
         int rows = accountMapper.insertAccount(account);
         return rows> 0 ? account : null;
     }
@@ -38,7 +39,11 @@ public class AccountService {
     }
 
     public Boolean login(String username, String password) {
-        return null;
+        Account account = accountMapper.selectAccountByUserName(username);
+        if (account.getPassword().equals(password)){
+            return true;
+        }
+        return false;
     }
 
 
@@ -51,4 +56,12 @@ public class AccountService {
     public Boolean checkEmailCode(String code) {
         return null;
     }
+
+    public Boolean batchInsertAccount(List<Account> accountList) {
+        for (int i = 0; i < accountList.size(); i++) {
+            accountMapper.insertAccount(accountList.get(i));
+        }
+        return true;
+    }
+
 }
