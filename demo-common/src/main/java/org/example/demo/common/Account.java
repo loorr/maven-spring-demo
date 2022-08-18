@@ -3,7 +3,7 @@ package org.example.demo.common;
 import lombok.*;
 
 @Data
-public class Account {
+public class Account{
     private Long id;
     private Long uid;
     private String nickname;

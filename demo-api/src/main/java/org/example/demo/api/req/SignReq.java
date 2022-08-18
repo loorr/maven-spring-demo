@@ -1,4 +1,4 @@
-package org.example.demo.common.req;
+package org.example.demo.api.req;
 
 import lombok.Data;
 

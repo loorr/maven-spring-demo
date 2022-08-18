@@ -1,10 +1,12 @@
 package org.example.demo.service;
 
-import com.fasterxml.jackson.databind.util.BeanUtil;
+import com.tove.web.infra.common.BaseErrorCode;
+import com.tove.web.infra.common.BaseException;
+import org.example.demo.api.req.SignReq;
 import org.example.demo.common.Account;
-import org.example.demo.common.req.SignReq;
 import org.example.demo.dao.AccountMapper;
 import org.springframework.beans.BeanUtils;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -21,8 +23,12 @@ public class AccountService {
         Account account = new Account();
         account.setUid(getUid());
         BeanUtils.copyProperties(req, account);
-        int rows = accountMapper.insertAccount(account);
-        return rows> 0 ? account : null;
+        try {
+            int rows = accountMapper.insertAccount(account);
+            return rows> 0 ? account : null;
+        }catch (DuplicateKeyException e){
+            throw new BaseException(BaseErrorCode.DUPLICATE_ERROR);
+        }
     }
 
     private Long getUid(){

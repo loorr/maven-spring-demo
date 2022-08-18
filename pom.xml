@@ -9,6 +9,7 @@
         <module>demo-dao</module>
         <module>demo-service</module>
         <module>demo-common</module>
+        <module>demo-api</module>
     </modules>
 
     <parent>

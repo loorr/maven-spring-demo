@@ -1,13 +1,17 @@
 package org.example.demo.controller;
 
+import com.tove.web.infra.common.BaseErrorCode;
+import com.tove.web.infra.common.Response;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
+import org.example.demo.api.AccountApi;
+import org.example.demo.api.vo.AccountVo;
 import org.example.demo.common.Account;
-import org.example.demo.common.req.SignReq;
+import org.example.demo.api.req.SignReq;
 import org.example.demo.service.AccountService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
@@ -17,33 +21,36 @@ import javax.validation.Valid;
 @Api("账户接口")
 @Slf4j
 @RestController
-public class AccountController {
+public class AccountController implements AccountApi {
     @Resource
     private AccountService accountService;
 
-
-    @GetMapping("/sign")
-    public Account sign(@Valid SignReq req) {
+    @Override
+    public Response<AccountVo> sign(@RequestBody  @Valid SignReq req) {
         Account account = accountService.sign(req);
-        return account;
+        AccountVo accountVo = new AccountVo();
+        BeanUtils.copyProperties(account, accountVo);
+        return Response.getOk(accountVo);
     }
 
-    @PostMapping("/login")
-    public Boolean login(String username, String password) {
+
+    @Override
+    public Response<Boolean> login(String username, String password) {
         try {
             if (!StringUtils.hasLength(username) || !StringUtils.hasLength(password)){
-                return false;
+                return Response.getFail(BaseErrorCode.ILLEGAL_PARAMETERS);
             }
             log.info("username: {}, password: {}", username, password);
             Boolean result = accountService.login(username, password);
-            return result;
+            return Response.getOk(result);
         } catch (Exception e) {
             log.error("login error", e);
-            return false;
+            return Response.getFail();
         }
     }
 
-    @PostMapping("/update-password")
+
+    @Override
     public Boolean updatePassword(String email) {
         if (!StringUtils.hasLength(email)){
             return false;
@@ -52,7 +59,7 @@ public class AccountController {
         return null;
     }
 
-    @PostMapping("/check-email-code")
+    @Override
     public Boolean checkEmailCode(String code) {
         if (!StringUtils.hasLength(code) || code.length() != 6){
             return false;
